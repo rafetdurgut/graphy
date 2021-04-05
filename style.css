@@ -1,0 +1,17 @@
+body
+{
+    margin:0;
+}
+body *
+{
+    margin:0;
+    padding:0;
+}
+#draw_area
+{
+    background-color:#fff;
+}
+#canvas
+{
+    border: 1px solid #333;
+}

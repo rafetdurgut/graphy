@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <header class="navbar navbar-dark bg-dark navbar-expand-md navbar-dark bd-navbar">
+        <nav class="shadow-sm navbar navbar-dark bg-dark">
+            <div class="container-fluid">
+              <a class="navbar-brand ml-5" href="#">
+                <i class="fa fa-code-fork fa-lg"></i>GRAPHY
+              </a>
+              <ul class="navbar-nav flex-row flex-wrap bd-navbar-nav pt-2 py-md-0">
+                <li class="nav-item col-6 col-md-auto">
+                  <a class="nav-link p-2" href="/" onclick="ga('send', 'event', 'Navbar', 'Community links', 'Bootstrap');">Home</a>
+                </li>
+                <li class="nav-item col-6 col-md-auto">
+                  <a class="nav-link p-2 active" aria-current="true" href="/docs/5.0/getting-started/introduction/" onclick="ga('send', 'event', 'Navbar', 'Community links', 'Docs');">Docs</a>
+                </li>
+                <li class="nav-item col-6 col-md-auto">
+                  <a class="nav-link p-2" href="/docs/5.0/examples/" onclick="ga('send', 'event', 'Navbar', 'Community links', 'Examples');">Examples</a>
+                </li>
+                <li class="nav-item col-6 col-md-auto">
+                  <a class="nav-link p-2" href="https://icons.getbootstrap.com/" onclick="ga('send', 'event', 'Navbar', 'Community links', 'Icons');" target="_blank" rel="noopener">Icons</a>
+                </li>
+                <li class="nav-item col-6 col-md-auto">
+                  <a class="nav-link p-2" href="https://themes.getbootstrap.com/" onclick="ga('send', 'event', 'Navbar', 'Community links', 'Themes');" target="_blank" rel="noopener">Themes</a>
+                </li>
+                <li class="nav-item col-6 col-md-auto">
+                  <a class="nav-link p-2" href="https://blog.getbootstrap.com/" onclick="ga('send', 'event', 'Navbar', 'Community links', 'Blog');" target="_blank" rel="noopener">Blog</a>
+                </li>
+              </ul>
+            </div>
+          </nav>
+    </header>
+
+    <div id="draw_area">
+        <canvas id="canvas"></canvas>
+        <div id="buttons">
+            <p>İşlem: <span id="modeLabel">Seçim Modu</span></p>
+            <button type="button" class="btn btn-primary" onclick="mode_change(0)">
+                <span class="fa fa-mouse-pointer" aria-hidden="true"></span> Seçim Modu
+            </button>
+            <button type="button" class="btn btn-primary" onclick="mode_change(0)">
+                <span class="fa fa-plus" aria-hidden="true"></span> Tepe Ekle
+            </button>
+            <button type="button" class="btn btn-primary" onclick="mode_change(0)">
+                <span class="fas fa-code-branch" aria-hidden="true"></span> Kenar Ekle
+            </button>
+            <button type="button" class="btn btn-primary" onclick="mode_change(0)">
+                <span class="fa fa-times" aria-hidden="true"></span> Silme Modu
+            </button>
+            <input type="button" onclick="new_graph()" value="Yeni Graph" />
+        </div>
+    </div>
+    <textarea class="form-control" id="adjancency_matrix" rows="10">0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 
+0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 
+</textarea>
+    <input type="button" onclick="parse_matrix()" value="Yükle" />
+    <div class="alert alert-danger" id="error">
+        <p>Error!</p>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"></script>
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <script type="text/javascript">
+    $('#error').hide();
+    </script>
+    <script src="main.js"></script>
+
+</body>
+</html>
