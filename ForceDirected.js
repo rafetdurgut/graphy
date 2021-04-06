@@ -1,37 +1,26 @@
-
-graph = (
-    {
-        nodes: [],
-        edges: []
-    }
-)
 var canvas = document.getElementById('canvas'),
 context = canvas.getContext('2d');
 context.translate(0.5, 0.5);
 window.addEventListener('resize', resizeCanvas, false);
-//window.addEventListener('contextmenu', rightclick, false);
 canvas.addEventListener('mousedown',drag_node,false);
 canvas.addEventListener('mouseup',drop_node,false);
 canvas.addEventListener('mousemove',move_node,false);
-canvas.addEventListener('DOMMouseScroll',handleScroll,false);
-canvas.addEventListener('mousewheel',handleScroll,false);
-var adj = [ ];
-var degrees = [];
-var nodes = [];
+
+var lastX=canvas.width/2, lastY=canvas.height/2;
+trackTransforms(context);
+
 var add_node_flag = false;
 var add_edge_flag = false;
 var remove_node_flag = false;
 var remove_edge_flag = false;
 var selection_mode = true;
-var edges = [];
-var radius = 20;
 var selected_node = -1;
 var scaleMultiplier = 0.2;
 var scaleFactor = 1.1;
-var lastX=canvas.width/2, lastY=canvas.height/2;
-trackTransforms(context);
-
 var drag = false;
+var nodeRadius = 10;
+var g = new Graph();
+var minDistance = 100;
 
 var handleScroll = function(evt){
     lastX = evt.offsetX || (evt.pageX - canvas.offsetLeft);
@@ -40,113 +29,81 @@ var handleScroll = function(evt){
     if (delta) zoom(delta);
     return evt.preventDefault() && false;
 };
-
-//load_matrix();
-
-function getNextVertex(visited)
+canvas.addEventListener('DOMMouseScroll',handleScroll,false);
+canvas.addEventListener('mousewheel',handleScroll,false);
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight*0.7;
+function Graph()
 {
-    var numV = adj[0].length;
-    var maxDegree = -1;
-    var max_ind = -1;
-    console.log("visited: "+visited);
-    for(i=0; i< numV; i++)
-    {
-        var d = 0;
-        for(j = 0; j< numV;j++) if(adj[i][j]) d++;
-        degrees.push(d);
-
-        if(d>maxDegree && !visited.includes(i))
-        {
-            maxDegree = d; max_ind = i
-        };
-    }
-    return max_ind;
+    this.nodes = [];
+    this.edges = [];
 }
-function new_graph()
+Graph.prototype.addEdge = function(edge)
 {
-    nodes=[];
-    edges = [];
+    this.edges.push(edge);
+}
+Graph.prototype.addNode = function(node)
+{
+    this.nodes.push(node);
+}
+Graph.prototype.ticked = function ticked()
+{
     clear();
-}
+    context = canvas.getContext('2d');
+    //Get Node positions
+    this.edges.forEach(edge => {
+        context.beginPath();
+        context.moveTo(edge.source.x, edge.source.y);
 
-function load_matrix()
-{
-    new_graph();
-    var numV = adj[0].length;
-    //Start from max_ind;
-    var visited = [];
-    var parent = null;
-    var pos = [200, 50];
-    var edgeLenth = 50;
-    var current = getNextVertex(visited);
-    node_list = [];        
-    while(visited.length < numV)
-    {
-        
-        visited.push(current);
-        nodes.push([pos[0] , pos[1], false, current] );
-        console.log(current);
-        node_list.push(current)
-        
-        var neighbors = [];
-        for(j = 0; j< numV;j++) if(adj[current][j]) neighbors.push([j, degrees[j]]);
-        neighbors.sort(function (x, y) {
-            return y[1] - x[1];
-        });
-        var theta = (Math.PI*2)/neighbors.length;
-        if (theta> Math.PI / 2) theta = Math.PI / 2;
-        neighbors.forEach(function(element, ind) {
-            if(!node_list.includes(element[0]))
-            {
-                nodes.push([pos[0]+ edgeLenth*Math.cos(theta*ind), pos[1]+ edgeLenth*Math.sin(theta*ind), false, element[0]] );
-                console.log(element[0]);
-                node_list.push(element[0]);
-                visited.push(element[0]);
-                
-            }
-        });
+        context.lineTo( edge.target.x, edge.target.y);
+        context.stroke();
+    });
 
-
-        //Neighbors kendi içinde komsu ise...
-        for(i=0; i<neighbors.length;i++)
-        {
-            //edges.push( [added_size, added_size + i + 1] )
-            /* for(j = i+1; j<neighbors.length;j++)
-                if(adj[neighbors[i]][neighbors[j]])
-                    edges.push( [added_size + i + 1, added_size + j + 1] ) */
-        }
-        
-        current = getNextVertex(visited);
-        
-        pos[0] += 100;
-        pos[1] += 50;
-        //console.log("Visited Number: "+added_size+"  Total Number:"+numV);
-        //komsuları kuyruga ekle
-
-        //BFS 
-        if(current != -1)
-        {
-            //Ortak olanlardan en yüksek dereceli olanını bul.
-        }
-        else
-        {
-            //Mainin komsularından en yüksek dereceli olanı bul.
-        }
-    } 
-    for(i = 0; i< numV;i++)
-    {
-        for(j = i+1; j< numV; j++)
-            if(adj[i][j]) 
-                edges.push([node_list[i], node_list[j], adj[i][j]]);
-    } 
-    drawStuff();    
+    //Draw Node
     
+    this.nodes.forEach(node => {
+        context.beginPath();
+        context.fillStyle="#000";
+        context.arc(node.x,node.y,nodeRadius,0,Math.PI*2,true);
+        context.closePath();
+        context.fill();
+    }); 
 }
-function rightclick(evt)
+var simulation;
+
+Graph.prototype.draw = function() {
+    //Clear Canvas   
+    var maxDistance = document.getElementById('strength').value;
+    var scaledPos = context.transformedPoint(canvas.width,canvas.height);
+    simulation = d3.forceSimulation()
+      .force("link", d3.forceLink().id(function (d) { return d.id; }).distance(100/scaleFactor).strength(1))
+      
+      .force("charge", d3.forceManyBody().strength(-(200/scaleFactor)).distanceMin(minDistance/scaleFactor).distanceMax(maxDistance))
+      .force("center", d3.forceCenter(scaledPos.x / 2, scaledPos.y / 2));
+     
+    simulation.nodes(this.nodes).on("tick", () => this.ticked());
+    simulation.force("link").links(this.edges);
+};
+function Edge(source, target)
 {
-    evt.preventDefault();
-    return false;
+    this.source = source; 
+    this.target = target;
 }
+
+function Node(id, label,pos)
+{
+    this.id = id;
+    this.label = label;
+    this.selected = false;
+}
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight*0.7;
+    trackTransforms(context);
+    g.ticked(); 
+}
+resizeCanvas();
+
 function zoom(delta)
 {
     var pt = context.transformedPoint(lastX,lastY);
@@ -155,15 +112,20 @@ function zoom(delta)
     context.scale(factor,factor);
     context.translate(-pt.x,-pt.y);
 
-    drawStuff();
+    g.ticked();
 }
-
+function clear()
+{
+    var p1 = context.transformedPoint(0,0);
+    var p2 = context.transformedPoint(canvas.width,canvas.height);
+    context.clearRect(p1.x,p1.y,p2.x-p1.x,p2.y-p1.y);
+}
 function clearSelection (selected)
 {
     selected_node = -1;
-    nodes.forEach( function (element, i) {
-        if(i != selected)
-            element[2] = false;
+    g.nodes.forEach( function (element, i) {
+        if(element.id != selected)
+            element.selected = false;
     });
 }
 function mode_change(mode)
@@ -212,24 +174,26 @@ function mode_change(mode)
             break;
     }
 }
+var dragStart = context.transformedPoint(lastX,lastY);
+var last_id = 0;
 function drag_node(event)
 {
 
     drag = true;
+    /* if(simulation)
+        simulation.stop(); */
+
     lastX = event.offsetX || (event.pageX - canvas.offsetLeft);
     lastY = event.offsetY || (event.pageY - canvas.offsetTop);
-    scaledPos = context.transformedPoint(lastX,lastY);
-    // Eğer seçili yoksa, ve burdan seçili gelirse burdan geleni seç
-
-    
-
+    scaledPos = context.transformedPoint(lastX,lastY); 
+    dragStart = context.transformedPoint(lastX,lastY); 
     var temp_selected = -1;
-    nodes.forEach( function (element, i) {
-        if(( (element[0]-radius) < scaledPos.x  && scaledPos.x < (element[0] + radius) 
-            && (element[1]-radius) < scaledPos.y && scaledPos.y < (element[1] + radius)) )
+    g.nodes.forEach( function (element, i) {
+        if(( (element.x-nodeRadius) < scaledPos.x  && scaledPos.x < (element.x + nodeRadius) 
+            && (element.y-nodeRadius) < scaledPos.y && scaledPos.y < (element.y + nodeRadius)) )
         {
             temp_selected = i;
-            element[2] = true;  
+            element.selected = true;  
         }    
     });
     
@@ -255,97 +219,120 @@ function drag_node(event)
             clearSelection(selected_node);
         }     
     }
-    console.log(selected_node);
-    drawStuff();
+    g.ticked();
 }
 function drop_node(event)
 {
     lastX = event.offsetX || (event.pageX - canvas.offsetLeft);
     lastY = event.offsetY || (event.pageY - canvas.offsetTop);
-    
     drag = false;
     if(add_node_flag)
         add_node(event);
+}
+function add_node(event) {
+    lastX = event.offsetX || (event.pageX - canvas.offsetLeft);
+    lastY = event.offsetY || (event.pageY - canvas.offsetTop);
+    scaledPos = context.transformedPoint(lastX,lastY);
+    if(selected_node == -1)
+    {
+        //console.log(g.nodes);
+
+        var n = (new Node(last_id,last_id));
+        g.addNode(n);
+        last_id++;
+        if(simulation)
+        {
+            simulation
+            .nodes(g.nodes);
+
+            simulation.alpha(0.3).restart();
+        }
+       
+        n.x = scaledPos.x;
+        n.y = scaledPos.y;
+        console.log(n);
+    }       
+   
 }
 function move_node(event)
 {
     
     lastX = event.offsetX || (event.pageX - canvas.offsetLeft);
     lastY = event.offsetY || (event.pageY - canvas.offsetTop);
-    scaledPos = context.transformedPoint(lastX,lastY);
-
-    if(drag && selected_node != -1)
+    scaledPos = context.transformedPoint(lastX,lastY); 
+    if(simulation!=null)
+        simulation.alphaTarget(0).restart();
+    if(drag)
     {
-        nodes[selected_node][0] = scaledPos.x;
-        nodes[selected_node][1] = scaledPos.y;
-        drawStuff();
+        
+        if(selected_node != -1)
+        {
+            g.nodes[selected_node].x = scaledPos.x;
+            g.nodes[selected_node].y = scaledPos.y;
+            g.ticked();
+        }
+        else
+        {
+            var pt = context.transformedPoint(lastX,lastY);
+            context.translate(pt.x-dragStart.x,pt.y-dragStart.y);
+        }
     }
     
 }
 
 
 
-function add_node(event) {
-    if(selected_node == -1)
-    {
-        lastX = event.offsetX || (event.pageX - canvas.offsetLeft);
-        lastY = event.offsetY || (event.pageY - canvas.offsetTop);
-        scaledPos = context.transformedPoint(lastX,lastY);
-        nodes.push([scaledPos.x, scaledPos.y,false,nodes.length]);
-    }       
-    drawStuff(); 
-}
-
-function clear()
-{
-    var p1 = context.transformedPoint(0,0);
-    var p2 = context.transformedPoint(canvas.width,canvas.height);
-    context.clearRect(p1.x,p1.y,p2.x-p1.x,p2.y-p1.y);
-}
-function draw_edge(edge)
-{
-    context.beginPath();
-    context.moveTo(nodes[edge[0]][0], nodes[edge[0]][1]);
-    context.lineTo(nodes[edge[1]][0], nodes[edge[1]][1]);
-    context.stroke();
-}
-function draw_node(element, i)
-{
-    context.beginPath();
-    if(!element[2])
-        context.fillStyle="#fff";
-    else
-        context.fillStyle="#819deb";
     
-    context.arc(element[0],element[1],radius,0,Math.PI*2,true);
-    context.closePath();
-    context.fill();
+    
 
-    context.lineWidth = 1;
-    if(!element[2])
-        context.strokeStyle="black";
+function loadMatrix()
+{
+    g = new Graph();
+    for(i =0; i < adj.length;i++)
+        g.addNode(new Node(i,i));
+    last_id = adj.length;
+    for(i =0; i < adj.length;i++)
+    {
+        for( j=0; j<adj.length; j++)
+            if(adj[i][j])
+                g.addEdge(new Edge(i,j));
+    }
+    g.draw();
+    
+}
+var parse_matrix = function parse_matrix()
+{
+    var data = document.getElementById('adjancency_matrix');
+    var lines = data.value.replace(/\r\n/g,"\n").split("\n");
+    adj = [];
+    lines.forEach(line => {
+        var cells = line.split(',');
+        if(cells != "" && cells.length > 0)
+        {
+            var cell_array = [];
+            for(var i=0; i<cells.length;i++) 
+            {
+                if(!isNaN(parseFloat(cells[i])))
+                    cell_array[i] = + parseFloat(cells[i]);
+            }
+            if(cell_array.length>0)
+                adj.push(cell_array);
+        }
+        
+    })
+    console.log( adj);
+    if(adj[0].length != adj.length || adj[0].length < 2)
+    {
+        $('#error').html("<strong>Hata</strong>: Satır ve sütun sayısı eşit olmalıdır!");
+        $('#error').show();
+    }
     else
-        context.strokeStyle="#819deb";
-    context.stroke();
-
-    context.font = '12pt Calibri';
-    if(!element[2])
-        context.fillStyle="black";
-    else
-        context.fillStyle="white";
-    context.textAlign = 'center';
-    context.fillText(element[3], element[0], element[1]+radius/4);
+    {
+        $('#error').hide();
+        loadMatrix();
+    }
 }
 
-function drawStuff() {
-        clear();
-        edges.forEach( function(element, i) {
-            draw_edge(element);
-            });
-        nodes.forEach( function(element, i) {
-            draw_node(element,i);
-        });     
-}
 function trackTransforms(context){
     var svg = document.createElementNS("http://www.w3.org/2000/svg",'svg');
     var xform = svg.createSVGMatrix();
@@ -401,3 +388,13 @@ function trackTransforms(context){
         return pt.matrixTransform(xform.inverse());
     }
 }
+
+
+
+
+
+
+
+
+
+
