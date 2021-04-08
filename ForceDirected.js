@@ -71,6 +71,7 @@ Graph.prototype.addNode = function(node)
 Graph.prototype.ticked = function ticked()
 {
     clear();
+    showLabel = document.getElementById('showLabel').checked;
     context = canvas.getContext('2d');
     //Get Node positions
     this.edges.forEach(edge => {
@@ -86,7 +87,6 @@ Graph.prototype.ticked = function ticked()
     });
 
     //Draw Node
-    
     this.nodes.forEach(node => {
         context.beginPath();
         context.fillStyle="#000";
@@ -95,10 +95,55 @@ Graph.prototype.ticked = function ticked()
         context.arc(node.x,node.y,nodeRadius,0,Math.PI*2,true);
         context.closePath();
         context.fill();
+
+       if(showLabel)
+       {
+        context.font = '8pt bold Calibri';
+        context.fillStyle="white";
+        context.textAlign = 'center';
+        context.fillText(node.label, node.x, node.y+4);
+       }
     }); 
 }
 var simulation;
-
+function createSpecialGraph(name, n=10, m=5)
+{
+    n = parseInt(n);
+    m = parseInt(m);
+    if(name=="path")
+    {
+        g = pathGraph(n);
+    }
+    else if(name=="cycle")
+    {
+        g = cycleGraph(n);
+    }
+    else if(name=="complete")
+    {
+        g = completeGraph(n);
+    }
+    else if(name=="wheel")
+    {
+        g = wheelGraph(n);
+    }
+    else if(name=="star")
+    {
+        g = starGraph(n);
+    }
+    else if(name=="friendship")
+    {
+        g = friendship(n);
+    }
+    else if(name=="comet")
+    {
+        g = comet(n,m);
+    }
+    else if(name=="kneser")
+    {
+        g = kneserGraph(n,m);
+    }
+    g.draw();
+}
 Graph.prototype.draw = function() {
     //Clear Canvas   
     var maxDistance = document.getElementById('strength').value;
@@ -109,9 +154,9 @@ Graph.prototype.draw = function() {
     .force("charge", d3.forceManyBody().strength(-(maxDistance)))
     .force("center", d3.forceCenter(canvas.width/ 2, canvas.height / 2))
     .force("collide", d3.forceCollide(nodeRadius).strength(0.2))
-    .force('y', d3.forceY().y(function(d) {
-        return 0;
-    }))
+    //.force('y', d3.forceY().y(function(d) {
+    //    return 0;
+   // }))
     .on("tick", () => this.ticked());
     simulation.force('link', d3.forceLink().links(this.edges).distance(distance));
 };
@@ -266,7 +311,7 @@ function drag_node(event)
                 simulation
                 .nodes(g.nodes)
                 .force("link").links(g.edges);
-                simulation.alphaTarget(0.3).restart();
+                simulation.alphaTarget(0.1).restart();
             }          
             clearSelection(-1);
         }
@@ -286,7 +331,7 @@ function drag_node(event)
             simulation
             .nodes(g.nodes);
 
-            simulation.alphaTarget(0.3).restart();
+            simulation.alphaTarget(0.0).restart();
         }
        
         n.x = scaledPos.x;
@@ -314,7 +359,7 @@ function drag_node(event)
                 simulation
                 .nodes(g.nodes)
                 .force("link").links(g.edges);
-                simulation.alphaTarget(0.3).restart();
+                simulation.alphaTarget(0.0).restart();
             }          
             clearSelection(-1);
     }
@@ -504,7 +549,4 @@ function redraw()
 
 }
 parse_matrix();
-
-
-
 

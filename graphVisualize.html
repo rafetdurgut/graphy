@@ -32,16 +32,21 @@
           </button>
         </div>
         
-        <div class="col-5">
+        <div class="col-4">
           <button type="button" class="menuButton btn btn-outline-dark" onclick="new_graph()">Yeni Graph</button>
             <a class="btn  btn-outline-dark dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
               Özel Graf
             </a>
           
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-              <li><a class="dropdown-item" href="#">Path Graf</a></li>
-              <li><a class="dropdown-item" href="#">Star Graf</a></li>
-              <li><a class="dropdown-item" href="#">Complete Graf</a></li>
+              <li><a class="dropdown-item" onclick="specialGraph('path')" data-bs-target="#specialGraphModal" href="#">Path Graf</a></li>
+              <li><a class="dropdown-item" onclick="specialGraph('cycle')" href="#">Cycle Graf</a></li>
+              <li><a class="dropdown-item" onclick="specialGraph('complete')" href="#">Complete Graf</a></li>
+              <li><a class="dropdown-item" onclick="specialGraph('wheel')" href="#">Wheel Graf</a></li>
+              <li><a class="dropdown-item" onclick="specialGraph('star')" href="#">Star Graf</a></li>
+              <li><a class="dropdown-item" onclick="specialGraph('friendship')" href="#">Friendship Graf</a></li>
+              <li><a class="dropdown-item" onclick="specialGraph('comet')" href="#">Comet Graf</a></li>
+              <li><a class="dropdown-item" onclick="specialGraph('kneser')" href="#">Kneser Graf</a></li>
             </ul>
           <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" id="adjButton" data-bs-target="#adjModal">
             Komşuluk Matrisi
@@ -53,14 +58,20 @@
           Dışarı Aktar
       </button>
         </div>
-     <div class="row col-5 form-inline ml-auto">
-      <div class="col-10 row">
-        <div class="col-sm-6">
+     <div class="row col-6 form-inline ml-auto">
+      
+      <div class="col-9 row">
+        <div class="col-sm-2 ">
+          <div class="form-group">
+            <input type="checkbox" class="form-check-input" id="showLabel" /> <label class="form-check-label">Etiketler</label>
+          </div>
+        </div>
+        <div class="col-sm-5">
          <label class="col-sm-3 col-form-label"> Kenar:</label>
             <input type="range" class="form-control-range" min="10" value="50" max="500" step="5" id="length" name="length" oninput="this.nextElementSibling.value = this.value">
           <output>100</output>
         </div>
-        <div class="col-sm-6">
+        <div class="col-sm-5">
           <label class="col-sm-3 col-form-label"> Dağılma:</label>
           <input type="range" class="form-control-range" min="0" value="100" max="1000" step="10" id="strength" name="strength" oninput="this.nextElementSibling.value = this.value">
           <output>100</output>
@@ -117,17 +128,58 @@
       </div>
     </div>
 
+
+    <div class="modal fade" id="specialGraphModal" tabindex="-1" aria-labelledby="specialGraphModal" aria-hidden="true" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Özel Graf Oluştur</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+          </div>
+          <div class="modal-body">
+            <label>Graf Adı:</label>
+            <input id="txtModalName" type="text" class="form-control" value="" disabled/>
+
+            <div id="modalN">
+              <label>n</label>
+             <input id="txtmodalN" type="number" class="form-control" />
+            </div>
+                <br/>
+            <div id="modalM">
+              <label>m</label>
+              <input id="txtmodalM" type="number" class="form-control" />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" aria-label="Close" data-bs-dismiss="modal">Kapat</button>
+            <button type="button" class="btn btn-primary" id="createGraphButton" data-bs-dismiss="modal">Oluştur</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="http://code.jquery.com/jquery.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
 
     
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/6.6.2/d3.min.js" integrity="sha512-L2eTGYYQqzK5YozYyUVrJKj2ZRnHE3QzV1+1yY6VXHExStF3potRZyEcD/B6sTOe04xYxB21QNLmVTQFcgwovg==" crossorigin="anonymous"></script>   
     <script src="ForceDirected.js"></script>
+    <script src="SpecialGraphs.js"></script>
     <script>
       $('.menuButton').on('click',function(){
         $('.menuButton').removeClass('active');
         $(this).addClass('active');
       });
+      function specialGraph(name)
+      {
+        $('#specialGraphModal').modal('show');
+        $('#txtModalName').val(name);
+      }
+
+      $('#createGraphButton').on('click',function(){
+        createSpecialGraph($('#txtModalName').val(),$('#txtmodalN').val(),$('#txtmodalM').val());
+      });
+      
     </script>
 
     
