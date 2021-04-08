@@ -11,75 +11,77 @@
 </head>
 <body>
     <header class="navbar navbar-dark bg-dark navbar-expand-md navbar-dark bd-navbar">
-        <nav class="shadow-sm navbar navbar-dark bg-dark">
-            <div class="container-fluid">
-              <a class="navbar-brand ml-5" href="#">
-                <i class="fa fa-code-fork fa-lg"></i>GRAPHY
-              </a>
-              <ul class="navbar-nav flex-row flex-wrap bd-navbar-nav pt-2 py-md-0">
-                <li class="nav-item col-6 col-md-auto">
-                  <a class="nav-link p-2 active" href="/" aria-current="true" >Anasayfa</a>
-                </li>
-                
-                <li class="nav-item col-6 col-md-auto">
-                  <a class="nav-link p-2" href="#" >Örnekler</a>
-                </li>
-                <li class="nav-item col-6 col-md-auto">
-                  <a class="nav-link p-2" href="#" >Graf Teorisi</a>
-                </li>
-                <li class="nav-item col-6 col-md-auto">
-                  <a class="nav-link p-2" href="#" >Destek</a>
-                </li>
-                <li class="nav-item col-6 col-md-auto">
-                  <a class="nav-link p-2" href="#" >İletişim</a>
-                </li>
-              </ul>
-            </div>
-          </nav>
+            <a  class="navbar-brand ml-5 " href="#">
+              <i class="fa fa-code-fork fa-lg"></i>GRAPHY
+            </a>
     </header>
+    <div class="container-fluid">
+      <div  class="row mt-3">      
+        <div class="col-2">
+          <button type="button" class="menuButton btn btn-outline-dark btn-lg" onclick="mode_change(0)" data-toggle="button" aria-pressed="false">
+            <span class="fa fa-mouse-pointer" aria-hidden="true"></span> 
+          </button>
+          <button type="button" class="menuButton btn btn-outline-dark btn-lg" onclick="mode_change(1)">
+              <span class="fa fa-plus" aria-hidden="true"></span> 
+          </button>
+          <button type="button" class="menuButton btn btn-outline-dark btn-lg" onclick="mode_change(2)">
+              <span class="fas fa-code-branch" aria-hidden="true"></span> 
+          </button>
+          <button type="button" class="menuButton btn btn-outline-dark btn-lg" onclick="mode_change(3)">
+              <span class="fa fa-times" aria-hidden="true"></span> 
+          </button>
+        </div>
+        
+        <div class="col-5">
+          <button type="button" class="menuButton btn btn-outline-dark" onclick="new_graph()">Yeni Graph</button>
+            <a class="btn  btn-outline-dark dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+              Özel Graf
+            </a>
+          
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+              <li><a class="dropdown-item" href="#">Path Graf</a></li>
+              <li><a class="dropdown-item" href="#">Star Graf</a></li>
+              <li><a class="dropdown-item" href="#">Complete Graf</a></li>
+            </ul>
+          <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" id="adjButton" data-bs-target="#adjModal">
+            Komşuluk Matrisi
+          </button>
+          <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" id="adjButton" data-bs-target="#adjModal">
+            Algoritmalar
+        </button>
+        <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" id="adjButton" data-bs-target="#adjModal">
+          Dışarı Aktar
+      </button>
+        </div>
+     <div class="row col-5 form-inline ml-auto">
+      <div class="col-10 row">
+        <div class="col-sm-6">
+         <label class="col-sm-3 col-form-label"> Kenar:</label>
+            <input type="range" class="form-control-range" min="10" value="50" max="500" step="5" id="length" name="length" oninput="this.nextElementSibling.value = this.value">
+          <output>100</output>
+        </div>
+        <div class="col-sm-6">
+          <label class="col-sm-3 col-form-label"> Dağılma:</label>
+          <input type="range" class="form-control-range" min="0" value="100" max="1000" step="10" id="strength" name="strength" oninput="this.nextElementSibling.value = this.value">
+          <output>100</output>
+        </div>
+      </div>
+      <div class="col-2">
+      <button type="button" class="btn btn-outline-success" onclick="redraw()">
+        Tekrar Çiz
+    </button>
+    </div>
+     </div>
+    </div>
 
+  </div>
     <div id="draw_area">
         <canvas class="col-12" id="canvas"></canvas>
-        <div id="buttons">
-            <p>İşlem: <span id="modeLabel">Seçim Modu</span></p>
-            
-            <button type="button" class="btn btn-primary" onclick="mode_change(0)">
-                <span class="fa fa-mouse-pointer" aria-hidden="true"></span> Seçim Modu
-            </button>
-            <button type="button" class="btn btn-primary" onclick="mode_change(1)">
-                <span class="fa fa-plus" aria-hidden="true"></span> Tepe Ekle
-            </button>
-            <button type="button" class="btn btn-primary" onclick="mode_change(2)">
-                <span class="fas fa-code-branch" aria-hidden="true"></span> Kenar Ekle
-            </button>
-            <button type="button" class="btn btn-primary" onclick="mode_change(3)">
-                <span class="fa fa-times" aria-hidden="true"></span> Silme Modu
-            </button>
-
-            <input type="button" class="btn btn-primary" onclick="new_graph()" value="Yeni Graph" />
-
-
-            Dağılma:
-            <input type="range" class="form-control-range" min="0" value="100" max="1000" step="10" id="strength" name="strength" oninput="this.nextElementSibling.value = this.value">
-            <output>100</output>
-            
-            <button type="button" class="btn btn-success" onclick="loadMatrix()">
-              Tekrar Çiz
-          </button>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" id="adjButton" data-bs-target="#adjModal">
-                Komşuluk Matrisi
-            </button>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" id="adjButton" data-bs-target="#adjModal">
-              Algoritmalar
-           </button>
-           <button type="button" class="btn btn-primary" data-bs-toggle="modal" id="adjButton" data-bs-target="#adjModal">
-            Dışarı Aktar
-         </button>
-
-        </div>
     </div>
-    
-    <div class="alert alert-danger" aria-hidden="true" id="error">
+    <div class="row">
+      <p> Durum: <span id="modeLabel">Seçim Modu</span></p>
+    </div>
+    <div class="alert alert-danger hidden" aria-hidden="true" id="error">
         <p>Error!</p>
     </div>
 
@@ -91,7 +93,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
           </div>
           <div class="modal-body">
-            <textarea class="form-control" id="adjancency_matrix" rows="10">
+            <textarea class="form-control" id="adjancency_matrix" rows="20">
 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -109,7 +111,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" aria-label="Close" data-bs-dismiss="modal">Kapat</button>
-            <button type="button" class="btn btn-primary" onclick="parse_matrix()">Yükle</button>
+            <button type="button" class="btn btn-primary" onclick="parse_matrix()" data-bs-dismiss="modal">Yükle</button>
           </div>
         </div>
       </div>
@@ -121,7 +123,12 @@
     
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/6.6.2/d3.min.js" integrity="sha512-L2eTGYYQqzK5YozYyUVrJKj2ZRnHE3QzV1+1yY6VXHExStF3potRZyEcD/B6sTOe04xYxB21QNLmVTQFcgwovg==" crossorigin="anonymous"></script>   
     <script src="ForceDirected.js"></script>
-
+    <script>
+      $('.menuButton').on('click',function(){
+        $('.menuButton').removeClass('active');
+        $(this).addClass('active');
+      });
+    </script>
 
     
 </body>

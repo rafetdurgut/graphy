@@ -102,7 +102,6 @@ function load_matrix()
                 console.log(element[0]);
                 node_list.push(element[0]);
                 visited.push(element[0]);
-                
             }
         });
 
