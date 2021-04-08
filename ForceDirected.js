@@ -8,6 +8,28 @@ canvas.addEventListener('mousemove',move_node,false);
 
 var lastX=canvas.width/2, lastY=canvas.height/2;
 trackTransforms(context);
+var drawGrid = function(ctx, w, h, step) {
+    var p1 = context.transformedPoint(0,0);
+    var p2 = context.transformedPoint(canvas.width,canvas.height);
+    context.clearRect(p1.x,p1.y,p2.x-p1.x,p2.y-p1.y);
+    ctx.beginPath(); 
+    for (var x=p1.x;x<=p2.x;x+=step) {
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, h);
+    }
+    ctx.strokeStyle = 'rgb(255,0,0)';
+    ctx.lineWidth = 0.1;
+    ctx.stroke(); 
+    ctx.beginPath(); 
+    for (var y=p1.y;y<=p2.y;y+=step) {
+            ctx.moveTo(0, y);
+            ctx.lineTo(w, y);
+    }
+    ctx.strokeStyle = 'rgb(20,20,20)';
+    ctx.lineWidth = 0.1;
+    ctx.stroke(); 
+};
+
 
 var add_node_flag = false;
 var add_edge_flag = false;
@@ -86,7 +108,7 @@ Graph.prototype.draw = function() {
     
     .force("charge", d3.forceManyBody().strength(-(maxDistance)))
     .force("center", d3.forceCenter(canvas.width/ 2, canvas.height / 2))
-    //.force("collide", d3.forceCollide(nodeRadius).strength(0.2))
+    .force("collide", d3.forceCollide(nodeRadius).strength(0.2))
     .force('y', d3.forceY().y(function(d) {
         return 0;
     }))
@@ -482,6 +504,7 @@ function redraw()
 
 }
 parse_matrix();
+
 
 
 
