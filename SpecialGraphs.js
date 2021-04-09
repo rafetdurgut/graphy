@@ -1,4 +1,3 @@
-
 var pathGraph = function(n)
 {
     var g = new Graph();
@@ -148,5 +147,16 @@ var kneserGraph = function(n,m)
             }
         }
     }    
+    return g;
+}
+var bipartiteGraph = function(n,m)
+{
+    var g = new Graph();
+    for(i=0;i<n+m;i++)
+        g.addNode(new Node(i,i));
+
+    for(i=0;i<n;i++)
+        for(j=n;j<(n+m);j++)
+            g.addEdge(new Edge(g.nodes[i],g.nodes[j]));
     return g;
 }

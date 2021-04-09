@@ -42,6 +42,7 @@
               <li><a class="dropdown-item" onclick="specialGraph('path')" data-bs-target="#specialGraphModal" href="#">Path Graf</a></li>
               <li><a class="dropdown-item" onclick="specialGraph('cycle')" href="#">Cycle Graf</a></li>
               <li><a class="dropdown-item" onclick="specialGraph('complete')" href="#">Complete Graf</a></li>
+              <li><a class="dropdown-item" onclick="specialGraph('bipartite')" href="#">Complete Bipartite Graf</a></li>
               <li><a class="dropdown-item" onclick="specialGraph('wheel')" href="#">Wheel Graf</a></li>
               <li><a class="dropdown-item" onclick="specialGraph('star')" href="#">Star Graf</a></li>
               <li><a class="dropdown-item" onclick="specialGraph('friendship')" href="#">Friendship Graf</a></li>
@@ -164,7 +165,7 @@
     
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/6.6.2/d3.min.js" integrity="sha512-L2eTGYYQqzK5YozYyUVrJKj2ZRnHE3QzV1+1yY6VXHExStF3potRZyEcD/B6sTOe04xYxB21QNLmVTQFcgwovg==" crossorigin="anonymous"></script>   
     <script src="ForceDirected.js"></script>
-    <script src="SpecialGraphs.js"></script>
+    <script src="createSpecialGraphs.js"></script>
     <script>
       $('.menuButton').on('click',function(){
         $('.menuButton').removeClass('active');
