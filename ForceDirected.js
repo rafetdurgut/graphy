@@ -30,7 +30,7 @@ var drawGrid = function(ctx, w, h, step) {
     ctx.stroke(); 
 };
 
-
+var selectedAlgorithm = "";
 var add_node_flag = false;
 var add_edge_flag = false;
 var remove_flag = false;
@@ -101,7 +101,7 @@ Graph.prototype.ticked = function ticked()
         context.font = '8pt bold Calibri';
         context.fillStyle="white";
         context.textAlign = 'center';
-        context.fillText(node.label, node.x, node.y+4);
+        context.fillText(node.id, node.x, node.y+4);
        }
     }); 
 }
@@ -146,6 +146,7 @@ function createSpecialGraph(name, n=10, m=5)
     {
         g = kneserGraph(n,m);
     }
+    last_id = g.nodes.length;
     g.draw();
 }
 Graph.prototype.draw = function() {
@@ -303,6 +304,15 @@ function drag_node(event)
     {
         clearSelection(temp_selected_node);
         selected_node = temp_selected_node;
+        if(selected_node != -1 && selectedAlgorithm != "")
+        {
+            var message = performAlgorithm(selectedAlgorithm,g,selected_node);
+            if( message.length)
+            {
+                 $('#statusBar span').text(message);
+                $('#statusBar').effect("highlight", {}, 2000);
+            }              
+        }
     }
     else if(add_edge_flag)
     {
@@ -552,5 +562,8 @@ function redraw()
     parse_matrix();
 
 }
-parse_matrix();
 
+$(document).ready(function()
+{
+    createSpecialGraph('path',10);
+});
