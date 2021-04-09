@@ -122,6 +122,10 @@ function createSpecialGraph(name, n=10, m=5)
     {
         g = completeGraph(n);
     }
+    else if(name=="bipartite")
+    {
+        g = bipartiteGraph(n,m);
+    }
     else if(name=="wheel")
     {
         g = wheelGraph(n);
