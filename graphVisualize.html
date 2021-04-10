@@ -62,6 +62,7 @@
           </a>
           <ul class="dropdown-menu" aria-labelledby="algosLink">
             <li><a class="dropdown-item" onclick="algorithmLink('DFS','Başlangıç Düğümü Seçiniz.')" href="#">Depth First Search</a></li>
+            <li><a class="dropdown-item" onclick="algorithmLink('BFS','Başlangıç Düğümü Seçiniz.')" href="#">Breadth First Search</a></li>
           </ul>
         <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" id="adjButton" data-bs-target="#adjModal">
           Dışarı Aktar
@@ -101,7 +102,7 @@
     <div class="row">
       <p> Durum: <span id="modeLabel">Seçim Modu</span></p>
     </div>
-    <div class="alert alert-danger hidden" aria-hidden="true" id="error">
+    <div class="alert alert-danger hidden" style="display:none" id="error">
         <p>Error!</p>
     </div>
 

@@ -140,10 +140,9 @@ var kneserGraph = function(n,m)
         for(j=i+1;j<combinations.length;j++)
         {
             var arr = combinations[i].filter(value => combinations[j].includes(value));
-            console.log(arr);
             if(arr.length==0)
             {
-                g.addEdge(new Edge(g.nodes[i], g.nodes[j]));
+                g.addEdge(new Edge(g.nodes[i].id, g.nodes[j].id));
             }
         }
     }    

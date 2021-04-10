@@ -59,6 +59,7 @@ function Graph()
 {
     this.nodes = [];
     this.edges = [];
+    this.directed = false;
 }
 Graph.prototype.addEdge = function(edge)
 {
@@ -79,11 +80,30 @@ Graph.prototype.ticked = function ticked()
         context.moveTo(edge.source.x, edge.source.y);
         context.lineTo( edge.target.x, edge.target.y);
         context.lineWidth = 3;
-
         context.strokeStyle ="#000";
         if(edge.selected)
             context.strokeStyle ="#0d6efd";
         context.stroke();
+        if(g.directed)
+        {
+            p2 = edge.target;
+            p1 = edge.source;
+
+            var angle = Math.atan2((p2.y - p1.y) , (p2.x - p1.x));
+            var hyp = Math.sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
+            
+            context.beginPath();
+            context.lineTo(hyp - 10, 10);
+            context.lineTo(hyp, 0);
+            context.lineTo(hyp - 10, -10);
+            if(edge.selected)
+                context.fillStyle = '#0d6efd';
+
+            context.fill();
+        }
+        
+
+        
     });
 
     //Draw Node
@@ -304,14 +324,17 @@ function drag_node(event)
     {
         clearSelection(temp_selected_node);
         selected_node = temp_selected_node;
-        if(selected_node != -1 && selectedAlgorithm != "")
+        if(selected_node != -1)
         {
-            var message = performAlgorithm(selectedAlgorithm,g,selected_node);
-            if( message.length)
+            if(selectedAlgorithm != "")
             {
-                 $('#statusBar span').text(message);
-                $('#statusBar').effect("highlight", {}, 2000);
-            }              
+                var message = performAlgorithm(selectedAlgorithm,g,selected_node);
+                if( message.length)
+                {
+                    $('#statusBar span').text(message);
+                    $('#statusBar').effect("highlight", {}, 2000);   
+                }     
+            }        
         }
     }
     else if(add_edge_flag)
@@ -344,7 +367,6 @@ function drag_node(event)
         {
             simulation
             .nodes(g.nodes);
-
             simulation.alphaTarget(0.0).restart();
         }
        
@@ -379,7 +401,6 @@ function drag_node(event)
     }
     else
     {       
-       console.log("Nothing");
     }
     g.ticked();
 }
@@ -434,11 +455,9 @@ function updateMatrix()
     }
 
     g.edges.forEach(element =>{
-        console.log(element.source.index);
         adj[element.source.index][element.target.index] = "1";
         adj[element.target.index][element.source.index] = "1";
     });
-    console.log(adj);
     var data = document.getElementById('adjancency_matrix');
     data.value = "";
     for(i=0;i<adj.length;i++)
@@ -454,17 +473,36 @@ function updateMatrix()
         
 
 }
+function graphType()
+{
+    //Directed or not
+    //True is directed, false is undirected
+    for(i =0; i < adj.length;i++)
+        for(j=0; j < adj.length;j++)
+            if(adj[i][j] != adj[j][i])
+                return true;
+    return false;
+}
 function loadMatrix()
 {
     g = new Graph();
     for(i =0; i < adj.length;i++)
         g.addNode(new Node(i,i));
     last_id = adj.length;
-    for(i =0; i < adj.length;i++)
+    g.directed = graphType();
+    if(g.directed)
     {
-        for( j=i; j<adj.length; j++)
-            if(adj[i][j])
-                g.addEdge(new Edge(i,j));
+        for(i =0; i < adj.length;i++)
+            for( j=0; j<adj.length; j++)
+                if(adj[i][j])
+                    g.addEdge(new Edge(i,j,adj[i][j]));
+    }
+    else
+    {
+        for(i =0; i < adj.length-1;i++)
+            for( j=i+1; j<adj.length; j++)
+                if(adj[i][j])
+                    g.addEdge(new Edge(i,j,adj[i][j]));
     }
     g.draw();
 }
@@ -562,7 +600,11 @@ function redraw()
     parse_matrix();
 
 }
-
+function algorithmEnd()
+{
+    selectedAlgorithm = "";
+    $('#statusBar').fadeOut();
+}
 $(document).ready(function()
 {
     createSpecialGraph('path',10);

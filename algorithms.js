@@ -4,7 +4,13 @@ function performAlgorithm(algo, graph, selectedNode)
     {
         var traversal = DFS(graph, selectedNode);
         animateTraversal(traversal,0,graph);
-        return "Dolaşım Sonucu: "+ traversal.toString();
+        return "DFS Dolaşım Sonucu: "+ traversal.toString();
+
+    }else if(algo == "BFS")
+    {
+        var traversal = BFS(graph, selectedNode);
+        animateTraversal(traversal,0,graph);
+        return "BFS Dolaşım Sonucu: "+ traversal.toString();
     }
 }
 
@@ -12,11 +18,19 @@ function animateTraversal(traversal,i, g) {
     var framesPerSecond = 4; 
     setTimeout(function() {
         if(i!=traversal.length-1)
+        {
             requestAnimationFrame(function() { animateTraversal(traversal,i+1, g)});
+        }
+        else
+        {
+            setTimeout(function()
+            {
+                algorithmEnd();
+            },5000);
+        }
+
         g.nodes[traversal[i]].selected = true;
         g.ticked();
-
-
     }, 1000 / framesPerSecond);
 }
 function isNeighbour(g, x, y)
@@ -37,17 +51,39 @@ function getDFSseq(graph, traversal, selectedNode)
 }
 var DFS = function(graph,  selectedNode)
 {
-    console.log(graph);
     var traversal = [];
     while(traversal.length < graph.nodes.length)
     {
-        console.log(selectedNode);
         getDFSseq(graph, traversal, selectedNode);
         if(traversal.length != graph.nodes.length)
             for(var i=0;i<graph.nodes.length;i++)
                 if(!traversal.includes(i))
                 {
                     selectedNode = i;
+                    break;
+                }
+    }
+    return traversal;
+}
+var BFS = function(graph,  selectedNode)
+{
+    var traversal = [];
+    var queue = [selectedNode];
+    while(traversal.length < graph.nodes.length)
+    {
+        while(queue.length >0)
+        {
+            selectedNode = queue.pop();
+            traversal.push(selectedNode);
+            for(var i=0; i<graph.nodes.length;i++)
+                if(!traversal.includes(i) && isNeighbour(graph, i, selectedNode))
+                    queue.unshift(i);
+        }
+        if(traversal.length != graph.nodes.length)
+            for(var i=0;i<graph.nodes.length;i++)
+                if(!traversal.includes(i))
+                {
+                    queue.unshift(i);
                     break;
                 }
     }
