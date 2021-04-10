@@ -71,11 +71,7 @@
      <div class="row col-6 form-inline ml-auto">
       
       <div class="col-9 row">
-        <div class="col-sm-2 ">
-          <div class="form-group">
-            <input type="checkbox" class="form-check-input" id="showLabel" /> <label class="form-check-label">Etiketler</label>
-          </div>
-        </div>
+       
         <div class="col-sm-5">
          <label class="col-sm-3 col-form-label"> Kenar:</label>
             <input type="range" class="form-control-range" min="10" value="50" max="500" step="5" id="length" name="length" oninput="this.nextElementSibling.value = this.value">
@@ -99,8 +95,32 @@
     <div id="draw_area">
         <canvas class="col-12" id="canvas"></canvas>
     </div>
-    <div class="row">
-      <p> Durum: <span id="modeLabel">Seçim Modu</span></p>
+    <div class="row col-12 toolbar">
+      <div class=col-6>
+        <p> Durum: <span id="modeLabel">Seçim Modu</span></p>
+      </div>
+      <div class=col-6>
+        <div class="row">
+          <div class="col-6 row">
+              <div class="col-6 mt-1 form-group">
+                <input type="checkbox" class="form-check-input" id="showLabel" /> <label for="showLabel" class="form-check-label">Etiketleri Göster</label>
+              </div>
+            <div class="col-6 mt-1 form-group">
+              <input type="checkbox" class="form-check-input" id="showWeights" /> <label for="showWeights" class="form-check-label">Ağırlıkları Göster</label>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="row form-group">
+              <div class="col-auto">
+                <label class="col-form-label">Ağırlık:</label>
+              </div>
+              <div class="col-auto">
+                <input type="text" class="form-control" id="txtWeight" /> 
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="alert alert-danger hidden" style="display:none" id="error">
         <p>Error!</p>
@@ -115,8 +135,8 @@
           </div>
           <div class="modal-body">
             <textarea class="form-control" id="adjancency_matrix" rows="20">
-0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 
@@ -179,27 +199,34 @@
     <script src="SpecialGraphs.js"></script>
     <script src="algorithms.js"></script>
     <script>
-      $('.menuButton').on('click',function(){
-        $('.menuButton').removeClass('active');
-        $(this).addClass('active');
-      });
-      function specialGraph(name)
+      $(document).ready(function()
       {
-        $('#specialGraphModal').modal('show');
-        $('#txtModalName').val(name);
-      }
-      function algorithmLink(algo, message)
-      {
-        $('#statusBar span').text(message);
-        $('#statusBar').fadeIn();
-        clearSelection();
-        mode_change(0);
-        selectedAlgorithm = algo;
-      }
-      $('#createGraphButton').on('click',function(){
-        createSpecialGraph($('#txtModalName').val(),$('#txtmodalN').val(),$('#txtmodalM').val());
+        $('.menuButton').on('click',function(){
+          $('.menuButton').removeClass('active');
+          $(this).addClass('active');
+        });
+        function specialGraph(name)
+        {
+          $('#specialGraphModal').modal('show');
+          $('#txtModalName').val(name);
+        }
+        function algorithmLink(algo, message)
+        {
+          $('#statusBar span').text(message);
+          $('#statusBar').fadeIn();
+          mode_change(0);
+          selectedAlgorithm = algo;
+        }
+        $('#createGraphButton').on('click',function(){
+          createSpecialGraph($('#txtModalName').val(),$('#txtmodalN').val(),$('#txtmodalM').val());
+        });
+        $('#showWeights').on("click",function(){
+          showWeights = $('#showWeights').prop('checked');
+        })
+        $('#txtWeight').on('change keyup paste',function(){
+            setEdgeWeight(this.value);
+        });
       });
-      
     </script>
 
     

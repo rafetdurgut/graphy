@@ -29,7 +29,7 @@ var drawGrid = function(ctx, w, h, step) {
     ctx.lineWidth = 0.1;
     ctx.stroke(); 
 };
-
+var showWeights = false;
 var selectedAlgorithm = "";
 var add_node_flag = false;
 var add_edge_flag = false;
@@ -37,13 +37,15 @@ var remove_flag = false;
 var selection_mode = true;
 var selected_node = -1;
 var selected_edge = -1;
+var temp_selected_edge = -1;
 var scaleMultiplier = 0.2;
 var scaleFactor = 1.1;
 var drag = false;
-var nodeRadius = 10;
+var nodeRadius = 16;
 var g = new Graph();
 var minDistance = 100;
 var adj = [];
+
 var handleScroll = function(evt){
     lastX = evt.offsetX || (evt.pageX - canvas.offsetLeft);
     lastY = evt.offsetY || (evt.pageY - canvas.offsetTop);
@@ -55,6 +57,85 @@ canvas.addEventListener('DOMMouseScroll',handleScroll,false);
 canvas.addEventListener('mousewheel',handleScroll,false);
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight*0.7;
+function drawNode(node)
+{
+    context.beginPath();
+    context.fillStyle="#fff";
+    context.strokeStyle ="#000";
+    if(node.selected)
+    {
+        context.fillStyle="#20639b";
+        context.strokeStyle ="#173F5F";
+    }
+    context.arc(node.x,node.y,nodeRadius,0,Math.PI*2,true);
+    context.lineWidth = 5;
+    context.stroke();
+    context.closePath();
+    context.fill();
+
+   if(showLabel)
+   {
+    context.font = 'bold 16px sans-serif';
+    context.fillStyle="#000";
+    if(node.selected)
+        context.fillStyle="#fff";
+    context.textAlign = 'center';
+    context.fillText(node.id, node.x, node.y+6);
+   }
+
+}
+function drawEdge(edge) {
+    var size=10;
+    var edgeWidth = 5; 
+    var p2 = {x:edge.target.x, y:edge.target.y};
+    var p1 = {x:edge.source.x, y:edge.source.y};
+    var angle = Math.atan2((p2.y - p1.y) , (p2.x - p1.x));
+    var hyp = Math.sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y))-nodeRadius;
+
+    context.save();
+    context.translate(p1.x, p1.y);
+    context.rotate(angle);
+
+    // line
+    context.beginPath();	
+    context.moveTo(0, 0);
+    context.lineTo(hyp - size* (g.directed ? 1 : 0), 0);
+    context.strokeStyle ="#000";
+    if(edge.selected)
+            context.strokeStyle ="#0d6efd";
+    context.lineWidth = edgeWidth;
+    context.stroke();
+    if(g.directed)
+    {
+        context.fillStyle ="#000";
+        if(edge.selected)
+            context.fillStyle ="#0d6efd";
+        context.beginPath();
+        context.lineTo(hyp - size, size);
+        context.lineTo(hyp, 0);
+        context.lineTo(hyp - size, -size);
+        context.fill();
+    }
+
+    if(showWeights)
+    {
+        context.font = 'bold 16px sans-serif';
+        context.fillStyle="#000";
+        if(edge.selected)
+            context.fillStyle="#0d6efd";
+        context.textAlign = 'center';
+        if(Math.abs(angle) > Math.PI/2  )
+        {
+            context.rotate(Math.PI);
+            context.fillText(edge.weight, -hyp/2,  -edgeWidth);
+
+        }
+        else
+            context.fillText(edge.weight, hyp/2, -edgeWidth);
+    }
+    context.restore();
+
+}
 function Graph()
 {
     this.nodes = [];
@@ -74,58 +155,51 @@ Graph.prototype.ticked = function ticked()
     clear();
     showLabel = document.getElementById('showLabel').checked;
     context = canvas.getContext('2d');
-    //Get Node positions
     this.edges.forEach(edge => {
-        context.beginPath();
-        context.moveTo(edge.source.x, edge.source.y);
-        context.lineTo( edge.target.x, edge.target.y);
-        context.lineWidth = 3;
-        context.strokeStyle ="#000";
-        if(edge.selected)
-            context.strokeStyle ="#0d6efd";
-        context.stroke();
-        if(g.directed)
-        {
-            p2 = edge.target;
-            p1 = edge.source;
-
-            var angle = Math.atan2((p2.y - p1.y) , (p2.x - p1.x));
-            var hyp = Math.sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
-            
-            context.beginPath();
-            context.lineTo(hyp - 10, 10);
-            context.lineTo(hyp, 0);
-            context.lineTo(hyp - 10, -10);
-            if(edge.selected)
-                context.fillStyle = '#0d6efd';
-
-            context.fill();
-        }
-        
-
-        
+        drawEdge(edge);      
     });
 
-    //Draw Node
     this.nodes.forEach(node => {
-        context.beginPath();
-        context.fillStyle="#000";
-        if(node.selected)
-            context.fillStyle="#0d6efd";
-        context.arc(node.x,node.y,nodeRadius,0,Math.PI*2,true);
-        context.closePath();
-        context.fill();
-
-       if(showLabel)
-       {
-        context.font = '8pt bold Calibri';
-        context.fillStyle="white";
-        context.textAlign = 'center';
-        context.fillText(node.id, node.x, node.y+4);
-       }
+        drawNode(node);
     }); 
 }
 var simulation;
+
+Graph.prototype.draw = function() {
+    //Clear Canvas   
+    var maxDistance = document.getElementById('strength').value;
+    var distance = document.getElementById('length').value;
+    var scaledPos = context.transformedPoint(canvas.width,canvas.height);
+    simulation = d3.forceSimulation(this.nodes)    
+    
+    .force("charge", d3.forceManyBody().strength(-(maxDistance)))
+    .force("center", d3.forceCenter(canvas.width/ 2, canvas.height / 2))
+    .force("collide", d3.forceCollide(nodeRadius).strength(0.2))
+    //.force('y', d3.forceY().y(function(d) {
+    //    return 0;
+   // }))
+    .on("tick", () => this.ticked());
+    simulation.force('link', d3.forceLink().links(this.edges).distance(distance));
+};
+function Edge(source, target,weight=1)
+{
+    this.source = source; 
+    this.target = target;
+    this.weight = weight;
+}
+
+function Node(id, label,pos)
+{
+    this.id = id;
+    this.label = label;
+    this.selected = false;
+}
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight*0.7;
+    trackTransforms(context);
+    g.ticked(); 
+}
 function createSpecialGraph(name, n=10, m=5)
 {
     n = parseInt(n);
@@ -169,40 +243,6 @@ function createSpecialGraph(name, n=10, m=5)
     last_id = g.nodes.length;
     g.draw();
 }
-Graph.prototype.draw = function() {
-    //Clear Canvas   
-    var maxDistance = document.getElementById('strength').value;
-    var distance = document.getElementById('length').value;
-    var scaledPos = context.transformedPoint(canvas.width,canvas.height);
-    simulation = d3.forceSimulation(this.nodes)    
-    
-    .force("charge", d3.forceManyBody().strength(-(maxDistance)))
-    .force("center", d3.forceCenter(canvas.width/ 2, canvas.height / 2))
-    .force("collide", d3.forceCollide(nodeRadius).strength(0.2))
-    //.force('y', d3.forceY().y(function(d) {
-    //    return 0;
-   // }))
-    .on("tick", () => this.ticked());
-    simulation.force('link', d3.forceLink().links(this.edges).distance(distance));
-};
-function Edge(source, target)
-{
-    this.source = source; 
-    this.target = target;
-}
-
-function Node(id, label,pos)
-{
-    this.id = id;
-    this.label = label;
-    this.selected = false;
-}
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight*0.7;
-    trackTransforms(context);
-    g.ticked(); 
-}
 resizeCanvas();
 function new_graph()
 {
@@ -210,7 +250,8 @@ function new_graph()
     g.nodes= [];
     g.edges = [];
     clear();
-    clearSelection();
+    clearNodeSelection();
+    clearEdgeSelection();
 }
 function zoom(delta)
 {
@@ -228,11 +269,19 @@ function clear()
     var p2 = context.transformedPoint(canvas.width,canvas.height);
     context.clearRect(p1.x,p1.y,p2.x-p1.x,p2.y-p1.y);
 }
-function clearSelection (selected)
+function clearNodeSelection (selected)
 {
     selected_node = -1;
     g.nodes.forEach( function (element, i) {
         if(element.id != selected)
+            element.selected = false;
+    });
+}
+function clearEdgeSelection(selected)
+{
+    selected_edge = -1;
+    g.edges.forEach( function (element, i) {
+        if( i != selected)
             element.selected = false;
     });
 }
@@ -242,6 +291,8 @@ function mode_change(mode)
     {
         case 0:
             document.getElementById("modeLabel").innerText = "Seçim Modu";
+            clearEdgeSelection();
+            clearNodeSelection();
             selection_mode = true; 
             add_node_flag = false; 
             add_edge_flag = false; 
@@ -273,20 +324,25 @@ function mode_change(mode)
 
 var dragStart = context.transformedPoint(lastX,lastY);
 var last_id = 0;
+function setEdgeWeight(weight)
+{
+    if(temp_selected_edge != -1)
+    {
+        g.edges[temp_selected_edge].weight = new Number(weight);
+        g.ticked();
+    }
+}
 function drag_node(event)
 {
 
     drag = true;
-    /* if(simulation)
-        simulation.stop(); */
-
     lastX = event.offsetX || (event.pageX - canvas.offsetLeft);
     lastY = event.offsetY || (event.pageY - canvas.offsetTop);
     scaledPos = context.transformedPoint(lastX,lastY); 
     dragStart = context.transformedPoint(lastX,lastY); 
 
     var temp_selected_node = -1;
-    var temp_selected_edge = -1;
+    temp_selected_edge = -1;
 
     g.nodes.forEach( function (element, i) {
         if(( (element.x-nodeRadius) < scaledPos.x  && scaledPos.x < (element.x + nodeRadius) 
@@ -296,6 +352,28 @@ function drag_node(event)
             element.selected = true;  
         }    
     });
+    if(temp_selected_node == -1)
+    {
+        g.edges.forEach( function (element, i) {
+            context.beginPath();
+            context.moveTo(element.source.x, element.source.y);
+            context.lineTo( element.target.x, element.target.y);
+            context.lineWidth = 15;
+            context.strokeStyle = 'rgba(0,0,0,1.0)';
+            //context.stroke();
+            //context.closePath();
+            if(  context.isPointInStroke(event.pageX - canvas.offsetLeft, event.pageY - canvas.offsetTop) ) 
+            {
+                element.selected=true;
+                document.getElementById('txtWeight').value = element.weight;
+                temp_selected_edge = i;
+            }
+            else
+            {
+                element.selected=false;
+            }
+        });
+    }
 
     if(remove_flag)
     {
@@ -322,8 +400,11 @@ function drag_node(event)
 
     if(selection_mode)
     {
-        clearSelection(temp_selected_node);
+        clearNodeSelection(temp_selected_node);
         selected_node = temp_selected_node;
+
+        clearEdgeSelection(temp_selected_edge);
+        selected_edge = temp_selected_edge;
         if(selected_node != -1)
         {
             if(selectedAlgorithm != "")
@@ -350,11 +431,11 @@ function drag_node(event)
                 .force("link").links(g.edges);
                 simulation.alphaTarget(0.1).restart();
             }          
-            clearSelection(-1);
+            clearNodeSelection(-1);
         }
         else if(temp_selected_node != -1)
         {
-            clearSelection(temp_selected_node);
+            clearNodeSelection(temp_selected_node);
             selected_node = temp_selected_node;
         }
     }
@@ -397,7 +478,7 @@ function drag_node(event)
                 .force("link").links(g.edges);
                 simulation.alphaTarget(0.0).restart();
             }          
-            clearSelection(-1);
+            clearNodeSelection(-1);
     }
     else
     {       
@@ -455,8 +536,10 @@ function updateMatrix()
     }
 
     g.edges.forEach(element =>{
-        adj[element.source.index][element.target.index] = "1";
-        adj[element.target.index][element.source.index] = "1";
+        
+        adj[element.source.index][element.target.index] = element.weight;
+        if(!g.directed)
+            adj[element.target.index][element.source.index] = element.weight;
     });
     var data = document.getElementById('adjancency_matrix');
     data.value = "";
@@ -495,14 +578,14 @@ function loadMatrix()
         for(i =0; i < adj.length;i++)
             for( j=0; j<adj.length; j++)
                 if(adj[i][j])
-                    g.addEdge(new Edge(i,j,adj[i][j]));
+                    g.addEdge(new Edge(i,j, adj[i][j]));
     }
     else
     {
         for(i =0; i < adj.length-1;i++)
             for( j=i+1; j<adj.length; j++)
                 if(adj[i][j])
-                    g.addEdge(new Edge(i,j,adj[i][j]));
+                    g.addEdge(new Edge(i,j, adj[i][j]));
     }
     g.draw();
 }

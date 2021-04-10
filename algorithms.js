@@ -33,10 +33,10 @@ function animateTraversal(traversal,i, g) {
         g.ticked();
     }, 1000 / framesPerSecond);
 }
-function isNeighbour(g, x, y)
+function isNeighbour(g, s, t)
 {
     for( var  i=0; i <g.edges.length; i++)
-        if(  (  (g.edges[i].source.id == x && g.edges[i].target.id == y )  || (g.edges[i].source.id ==y && g.edges[i].target.id == x ) ) ) 
+        if(  (  (g.edges[i].source.id == s && g.edges[i].target.id == t )  || ( !g.directed && (g.edges[i].source.id ==t && g.edges[i].target.id == s ) ) )) 
             return true;
         
     return false;
@@ -46,7 +46,7 @@ function getDFSseq(graph, traversal, selectedNode)
     traversal.push(selectedNode);
 
     for(var i=0; i<graph.nodes.length; i++)
-        if( !traversal.includes(i) && isNeighbour(graph, i, selectedNode))
+        if( !traversal.includes(i) && isNeighbour(graph, selectedNode, i ))
             getDFSseq(graph, traversal, i);
 }
 var DFS = function(graph,  selectedNode)
