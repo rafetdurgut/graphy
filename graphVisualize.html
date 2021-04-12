@@ -205,18 +205,7 @@
           $('.menuButton').removeClass('active');
           $(this).addClass('active');
         });
-        function specialGraph(name)
-        {
-          $('#specialGraphModal').modal('show');
-          $('#txtModalName').val(name);
-        }
-        function algorithmLink(algo, message)
-        {
-          $('#statusBar span').text(message);
-          $('#statusBar').fadeIn();
-          mode_change(0);
-          selectedAlgorithm = algo;
-        }
+        
         $('#createGraphButton').on('click',function(){
           createSpecialGraph($('#txtModalName').val(),$('#txtmodalN').val(),$('#txtmodalM').val());
         });
