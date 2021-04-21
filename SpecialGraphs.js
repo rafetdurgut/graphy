@@ -159,3 +159,18 @@ var bipartiteGraph = function(n,m)
             g.addEdge(new Edge(g.nodes[i],g.nodes[j]));
     return g;
 }
+var RafetGraph = function(n)
+{
+    var g = new Graph();
+    for(var i=0;i<4*n+1;i++)
+        g.addNode(new Node(i,i));
+
+    for(var i=0;i<n;i++)
+    {
+        for(var j=0;j<3;j++)
+            g.addEdge( new Edge(g.nodes[i*4+j], g.nodes[i*4+j+1]));
+        g.addEdge( new Edge(g.nodes[i*4], g.nodes[i*4+3]));
+        g.addEdge( new Edge(g.nodes[i*4], g.nodes[n*4]));
+    }
+    return g;
+}

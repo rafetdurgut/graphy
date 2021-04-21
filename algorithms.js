@@ -15,7 +15,7 @@ function performAlgorithm(algo, graph, selectedNode)
 }
 
 function animateTraversal(traversal,i, g) {
-    var framesPerSecond = 4; 
+    var framesPerSecond = 1; 
     setTimeout(function() {
         if(i!=traversal.length-1)
         {
@@ -76,7 +76,7 @@ var BFS = function(graph,  selectedNode)
             selectedNode = queue.pop();
             traversal.push(selectedNode);
             for(var i=0; i<graph.nodes.length;i++)
-                if(!traversal.includes(i) && isNeighbour(graph, i, selectedNode))
+                if(!traversal.includes(i) && isNeighbour(graph, selectedNode, i ))
                     queue.unshift(i);
         }
         if(traversal.length != graph.nodes.length)

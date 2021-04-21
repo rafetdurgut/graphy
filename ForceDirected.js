@@ -212,6 +212,10 @@ function createSpecialGraph(name, n=10, m=5)
     {
         g = cycleGraph(n);
     }
+    else if(name=="rafet")
+    {
+        g = RafetGraph(n);
+    }
     else if(name=="complete")
     {
         g = completeGraph(n);
@@ -692,3 +696,15 @@ $(document).ready(function()
 {
     createSpecialGraph('path',10);
 });
+function specialGraph(name)
+{
+    $('#specialGraphModal').modal('show');
+    $('#txtModalName').val(name);
+}
+function algorithmLink(algo, message)
+{
+    $('#statusBar span').text(message);
+    $('#statusBar').fadeIn();
+    mode_change(0);
+    selectedAlgorithm = algo;
+}
