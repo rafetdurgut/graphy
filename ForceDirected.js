@@ -61,7 +61,13 @@ function drawNode(node)
 {
     context.beginPath();
     context.fillStyle="#fff";
-    context.strokeStyle ="#000";
+    if(node.color == null)
+        context.strokeStyle ="#000";
+    else
+    {
+        context.strokeStyle =node.color;
+        context.fillStyle =node.color;        
+    }
     if(node.selected)
     {
         context.fillStyle="#20639b";
@@ -142,6 +148,7 @@ function Graph()
     this.edges = [];
     this.directed = false;
 }
+
 Graph.prototype.addEdge = function(edge)
 {
     this.edges.push(edge);
@@ -193,6 +200,7 @@ function Node(id, label,pos)
     this.id = id;
     this.label = label;
     this.selected = false;
+    this.color = null;
 }
 function resizeCanvas() {
     canvas.width = window.innerWidth;
@@ -211,10 +219,6 @@ function createSpecialGraph(name, n=10, m=5)
     else if(name=="cycle")
     {
         g = cycleGraph(n);
-    }
-    else if(name=="rafet")
-    {
-        g = RafetGraph(n);
     }
     else if(name=="complete")
     {

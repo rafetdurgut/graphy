@@ -12,6 +12,13 @@ function performAlgorithm(algo, graph, selectedNode)
         animateTraversal(traversal,0,graph);
         return "BFS Dolaşım Sonucu: "+ traversal.toString();
     }
+    else if(algo == "GraphColoring")
+    {
+        var colors = ["red","green","blue","yellow","black"];
+        var chromNumber = GraphColoring(graph, colors);
+        return "Kromatik Sayı: "+ chromNumber;
+    }
+    
 }
 
 function animateTraversal(traversal,i, g) {
@@ -88,4 +95,59 @@ var BFS = function(graph,  selectedNode)
                 }
     }
     return traversal;
+}
+var getNextNode = function(graph, visited)
+{
+    for(v in graph.nodes)
+        if(!visited.includes(v))
+            return v;
+
+    return -1;
+}
+function coloringOk(graph)
+{
+    for(e in graph.edges)
+        if( (graph.edges[e].source.color != null && graph.edges[e].target.color != null) && (graph.edges[e].source.color == graph.edges[e].target.color) )
+            return false;
+    return true;
+}
+var backtrack = function(graph, visited, colors)
+{
+    if(visited.length == graph.nodes.length)
+        return graph;
+    
+    var nextNode = getNextNode(graph, visited);
+
+    for( c in colors)
+    {
+        copy_visited = visited.map( (x) => x);
+        copy_visited.push(nextNode);
+
+        copy_graph = $.extend(true, {}, graph);
+        copy_graph.nodes[nextNode].color = colors[c];
+
+        if(coloringOk (copy_graph))
+        {
+            result = backtrack(copy_graph, copy_visited, colors);
+            if(result != null)
+                return result;
+        }
+    }
+    return null;
+}
+var GraphColoring = function(graph, colors)
+{
+    var visited = [];
+
+    var result = backtrack(graph, visited, colors);
+
+    var usedColors = [];
+    for(v in graph.nodes)
+    {
+        if(!usedColors.includes(graph.nodes[v].color))
+            usedColors.push(graph.nodes[v].color);
+    }
+
+    return usedColors.length;
+
 }
