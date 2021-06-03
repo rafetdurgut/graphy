@@ -18,6 +18,11 @@ function performAlgorithm(algo, graph, selectedNode)
         var chromNumber = GraphColoring(graph, colors);
         return "Kromatik Sayı: "+ chromNumber;
     }
+    else if(algo == "GraphParameters")
+    {
+        var cc = ConnectedComponent(graph,selectedNode);
+        alert(cc);
+    }
     
 }
 
@@ -135,6 +140,31 @@ var backtrack = function(graph, visited, colors)
     }
     return null;
 }
+var ConnectedComponent = function(graph,  selectedNode)
+{
+    var diameter = -1;
+    var cc = 0;
+    var traversal = [];
+    var traversSize = 0;
+    while(traversal.length < graph.nodes.length)
+    {
+        cc ++;
+        getDFSseq(graph, traversal, selectedNode);
+        if ( (traversal.length - traversSize) > diameter) 
+            diameter = traversal.length - traversSize;
+        traversSize = traversal.length;
+        if(traversal.length != graph.nodes.length)
+            for(var i=0;i<graph.nodes.length;i++)
+                if(!traversal.includes(i))
+                {
+                    selectedNode = i;
+                    break;
+                }
+    }
+    alert("diameter: "+ diameter);
+    return cc;
+
+}
 var GraphColoring = function(graph, colors)
 {
     var visited = [];
@@ -147,7 +177,5 @@ var GraphColoring = function(graph, colors)
         if(!usedColors.includes(graph.nodes[v].color))
             usedColors.push(graph.nodes[v].color);
     }
-
     return usedColors.length;
-
 }
